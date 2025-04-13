@@ -30,7 +30,7 @@ export class SupabaseService {
     const tz = 'Europe/Chisinau';
 
     const parsed = dayjs.tz(raw, format, tz);
-    const nowChisinau = dayjs(date).add(6, 'hour');
+    const nowChisinau = dayjs(date);
     if (!parsed.isValid()) {
       throw new Error(`Invalid date format: "${raw}"`);
     }
@@ -78,7 +78,6 @@ export class SupabaseService {
 
     const nowUtc = nowChisinau.utc().toISOString();
     const oneMinuteAgoUtc = oneMinuteAgoChisinau.utc().toISOString();
-
     const { data, error } = await this.client
       .from('reminders')
       .select('*')

@@ -75,7 +75,7 @@ export class SupabaseService {
   > {
     const nowChisinau = dayjs().add(6, 'hour'); // текущее время +3ч
     const oneMinuteAgoChisinau = nowChisinau.subtract(1, 'minute'); // минута назад
-
+    console.log('nowChisinau', nowChisinau);
     const nowUtc = nowChisinau.utc().toISOString();
     const oneMinuteAgoUtc = oneMinuteAgoChisinau.utc().toISOString();
     const { data, error } = await this.client

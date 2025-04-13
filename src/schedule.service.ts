@@ -15,6 +15,8 @@ export class ReminderSchedulerService {
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   async handleReminderCheck() {
+    const now = new Date();
+    console.log(now);
     const reminders = await this.supabase.getDueReminders();
 
     for (const reminder of reminders) {

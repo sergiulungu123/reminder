@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ReminderService } from './app.service';
 import { BotUpdate } from './bot.update';
 import { session } from 'telegraf';
 import { SupabaseService } from './supabase.service';
+import { ReminderSchedulerService } from './schedule.service';
 // import { reminderWizard } from './reminder.wizard';
 @Module({
   imports: [
@@ -16,6 +16,7 @@ import { SupabaseService } from './supabase.service';
     }),
     ScheduleModule.forRoot(),
   ],
-  providers: [ReminderService, BotUpdate, SupabaseService],
+  exports: [TelegrafModule],
+  providers: [ReminderSchedulerService, BotUpdate, SupabaseService],
 })
 export class AppModule {}

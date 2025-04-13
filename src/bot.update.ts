@@ -1,7 +1,9 @@
-import { Update, Start, Ctx, Hears, On } from 'nestjs-telegraf';
+import { Update, Start, Ctx, Hears, On, Action } from 'nestjs-telegraf';
 import { BotContext } from './bot.context';
 import { Message } from 'telegraf/typings/core/types/typegram';
 import { SupabaseService } from './supabase.service';
+import { Markup } from 'telegraf';
+import dayjs from 'dayjs';
 
 @Update()
 export class BotUpdate {
@@ -33,14 +35,26 @@ export class BotUpdate {
 
   @Hears('🔔 Посмотреть все напоминания')
   async onViewReminders(@Ctx() ctx: BotContext) {
-    const reminders = await this.supabase.getReminders(ctx.chat!.id);
+    const chatId = ctx.chat!.id;
+    const reminders = await this.supabase.getReminders(chatId);
+
     if (!reminders.length) {
       return await ctx.reply('📭 Напоминаний пока нет.');
     }
 
-    const message = reminders.map((r) => `🕒 ${r.date} — ${r.text}`).join('\n');
+    for (const reminder of reminders) {
+      const formatted = dayjs(reminder.date)
+        .subtract(7, 'hour')
+        .format('HH:mm DD.MM.YYYY');
 
-    await ctx.reply(`🔔 Ваши напоминания:\n\n${message}`);
+      const message = `🕒 ${formatted}\n📝 ${reminder.text}`;
+      await ctx.reply(
+        message,
+        Markup.inlineKeyboard([
+          [Markup.button.callback('🗑 Удалить', `delete_${reminder.id}`)],
+        ]),
+      );
+    }
   }
 
   @On('text')
@@ -79,6 +93,25 @@ export class BotUpdate {
       session.step = undefined;
       session.time = undefined;
       return;
+    }
+  }
+
+  @Action(/delete_.+/)
+  async onDeleteReminder(@Ctx() ctx: BotContext) {
+    // eslint-disable-next-line no-unsafe-optional-chaining, @typescript-eslint/no-non-null-asserted-optional-chain
+    const data = 'data' in ctx?.callbackQuery! ? ctx.callbackQuery.data : null;
+
+    if (!data || !data.startsWith('delete_')) return;
+
+    const id = data.replace('delete_', '');
+
+    try {
+      await this.supabase.deleteReminder(id);
+      await ctx.answerCbQuery('Удалено ✅');
+      await ctx.editMessageText('❌ Напоминание удалено');
+    } catch (err) {
+      await ctx.answerCbQuery('Ошибка при удалении ❌', { show_alert: true });
+      console.error('Ошибка при удалении напоминания:', err);
     }
   }
 }

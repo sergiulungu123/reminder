@@ -25,6 +25,8 @@ export class ReminderService {
 
   @On('text')
   async onText(@Message('chat.id') chatId: number) {
-    await this.bot.telegram.sendMessage(chatId, 'Test');
+    console.log('Chat ID:', chatId);
+    const id = '434811237';
+    await this.bot.telegram.sendMessage(id, 'Test');
   }
 }

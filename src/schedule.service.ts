@@ -15,15 +15,13 @@ export class ReminderSchedulerService {
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   async handleReminderCheck() {
-    const now = new Date();
-    console.log(now);
     const reminders = await this.supabase.getDueReminders();
 
     for (const reminder of reminders) {
       try {
         await this.bot.telegram.sendMessage(
           reminder.chat_id,
-          `🔔 Напоминание!\n🕒 ${reminder.date}\n📝 ${reminder.text}`,
+          `🔔 Напоминание!\n📝 ${reminder.text}`,
         );
 
         await this.supabase.markAsDelivered(reminder.id); // 👈 тут обновляем

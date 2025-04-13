@@ -10,7 +10,6 @@ export class ReminderService {
     @InjectBot() private readonly bot: Telegraf<Context>,
   ) {}
 
-  // Пример: отправка напоминания каждые 10 секунд (для демонстрационных целей)
   // @Cron(CronExpression.EVERY_10_SECONDS)
   // async handleCron() {
   //   console.log('Напоминание');
@@ -24,9 +23,11 @@ export class ReminderService {
   // }
 
   @On('text')
-  async onText(@Message('chat.id') chatId: number) {
-    console.log('Chat ID:', chatId);
-    const id = '434811237';
-    await this.bot.telegram.sendMessage(id, 'Test');
+  async onText(
+    @Message('text') text: string,
+    @Message('chat.id') chatId: number,
+  ) {
+    console.log('Received message:', text);
+    await this.bot.telegram.sendMessage(chatId, 'Echo: ' + text);
   }
 }

@@ -44,7 +44,7 @@ export class BotUpdate {
 
     for (const reminder of reminders) {
       const formatted = dayjs(reminder.date)
-        .subtract(7, 'hour')
+        .subtract(5, 'hour')
         .format('HH:mm DD.MM.YYYY');
 
       const message = `🕒 ${formatted}\n📝 ${reminder.text}`;

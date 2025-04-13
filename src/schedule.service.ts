@@ -13,7 +13,7 @@ export class ReminderSchedulerService {
     console.log('✅ ReminderScheduler запущен');
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleReminderCheck() {
     const reminders = await this.supabase.getDueReminders();
 

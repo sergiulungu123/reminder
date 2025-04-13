@@ -30,7 +30,7 @@ export class SupabaseService {
     const tz = 'Europe/Chisinau';
 
     const parsed = dayjs.tz(raw, format, tz);
-    const nowChisinau = dayjs(date).add(5, 'hour');
+    const nowChisinau = dayjs(date).add(6, 'hour');
     if (!parsed.isValid()) {
       throw new Error(`Invalid date format: "${raw}"`);
     }
@@ -73,7 +73,7 @@ export class SupabaseService {
   async getDueReminders(): Promise<
     { id: string; chat_id: number; text: string; date: string }[]
   > {
-    const nowChisinau = dayjs().add(5, 'hour'); // текущее время +3ч
+    const nowChisinau = dayjs().add(6, 'hour'); // текущее время +3ч
     const oneMinuteAgoChisinau = nowChisinau.subtract(1, 'minute'); // минута назад
 
     const nowUtc = nowChisinau.utc().toISOString();

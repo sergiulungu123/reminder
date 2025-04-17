@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
+import { ConfigType } from '@nestjs/config';
+import appConfig from './config/app.config';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -10,12 +12,11 @@ dayjs.extend(timezone);
 @Injectable()
 export class SupabaseService {
   private readonly client: SupabaseClient;
-
-  constructor() {
-    const url = 'https://lrsgsgkissnmromalfsu.supabase.co';
-    const key =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxyc2dzZ2tpc3NubXJvbWFsZnN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1NDExMzEsImV4cCI6MjA2MDExNzEzMX0.OlXZpo0mgZDnKK9iiEyrzF1avMlPdwa3YSuf3H0-YK4';
-    this.client = createClient(url, key);
+  constructor(
+    @Inject(appConfig.KEY)
+    private readonly conf: ConfigType<typeof appConfig>,
+  ) {
+    this.client = createClient(this.conf.supabaseUrl, this.conf.supabaseToken);
   }
 
   getClient(): SupabaseClient {
@@ -24,7 +25,6 @@ export class SupabaseService {
 
   async addReminder(chatId: number, date: string, text: string) {
     const raw = date; // "15:30 13/04/2025"
-
     // Дата в формате "DD/MM/YYYY HH:mm"
     const format = 'HH:mm DD/MM/YYYY';
     const tz = 'Europe/Chisinau';
@@ -88,8 +88,6 @@ export class SupabaseService {
     if (error) {
       throw new Error(`Failed to fetch due reminders: ${error.message}`);
     }
-
-    console.log('Due reminders:', data);
 
     return (data ?? []).map((reminder) => ({
       id: reminder.id,

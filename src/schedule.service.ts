@@ -6,7 +6,7 @@ import { Telegraf } from 'telegraf';
 
 @Injectable()
 export class ReminderSchedulerService {
-  private readonly logger = new Logger(ReminderSchedulerService.name);
+  private readonly logger = new Logger();
   constructor(
     private readonly supabase: SupabaseService,
     @InjectBot() private readonly bot: Telegraf<any>, // ✅ вот это главное

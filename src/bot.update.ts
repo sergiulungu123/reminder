@@ -4,6 +4,10 @@ import { Message } from 'telegraf/typings/core/types/typegram';
 import { SupabaseService } from './supabase.service';
 import { Markup } from 'telegraf';
 import dayjs from 'dayjs';
+const FULL_DATE_TIME =
+  /^([01]\d|2[0-3]):([0-5]\d)\s(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+const SHORT_DATE_TIME =
+  /^([01]\d|2[0-3]):([0-5]\d)\s(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])$/;
 
 @Update()
 export class BotUpdate {
@@ -30,7 +34,11 @@ export class BotUpdate {
   async onAddReminder(@Ctx() ctx: BotContext) {
     ctx.session.step = 'awaiting_time';
     ctx.session.time = undefined;
-    await ctx.reply('Введите время (например 15:30 12/12/2023)');
+    const exampleDate = dayjs().add(1, 'hour').format('HH:mm DD/MM/YYYY');
+    await ctx.reply(
+      `⏰ Введите время и дату в формате(Можно нажать и скопируется):\n<code>${exampleDate}</code>\n`,
+      { parse_mode: 'HTML' },
+    );
   }
 
   @Hears('🔔 Посмотреть все напоминания')
@@ -39,7 +47,8 @@ export class BotUpdate {
     const reminders = await this.supabase.getReminders(chatId);
 
     if (!reminders.length) {
-      return await ctx.reply('📭 Напоминаний пока нет.');
+      await ctx.reply('📭 Напоминаний пока нет.');
+      return;
     }
 
     for (const reminder of reminders) {
@@ -67,6 +76,14 @@ export class BotUpdate {
     if (!session.step) return;
 
     if (session.step === 'awaiting_time') {
+      if (!this.validateTimeInput(text)) {
+        const exampleDate = dayjs().add(1, 'hour').format('HH:mm DD/MM/YYYY');
+        await ctx.reply(
+          `❌ Неверный формат времени. Пример формата:\n<code>${exampleDate}</code>\n`,
+          { parse_mode: 'HTML' },
+        );
+        return;
+      }
       session.time = text;
       session.step = 'awaiting_text';
       await ctx.reply('Введите текст напоминания');
@@ -82,7 +99,6 @@ export class BotUpdate {
       const [day, month, year] = datePart.split('/');
 
       const isoDatetime = `${year}-${month}-${day}T${timePart}:00`;
-
       await this.supabase.addReminder(ctx.chat!.id, isoDatetime, text);
       await ctx.reply(
         `✅ Напоминание установлено:\n🕒 Время: ${reminderTime}\n📝 Текст: ${reminderText}`,
@@ -111,5 +127,9 @@ export class BotUpdate {
       await ctx.answerCbQuery('Ошибка при удалении ❌', { show_alert: true });
       console.error('Ошибка при удалении напоминания:', err);
     }
+  }
+
+  private validateTimeInput(text: string): boolean {
+    return FULL_DATE_TIME.test(text) || SHORT_DATE_TIME.test(text);
   }
 }

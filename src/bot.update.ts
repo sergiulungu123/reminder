@@ -34,9 +34,9 @@ export class BotUpdate {
   async onAddReminder(@Ctx() ctx: BotContext) {
     ctx.session.step = 'awaiting_time';
     ctx.session.time = undefined;
-    const exampleDate = dayjs().add(1, 'hour').format('HH:mm DD/MM/YYYY');
+    const exampleDate = dayjs().format('HH:mm DD/MM/YYYY');
     await ctx.reply(
-      `⏰ Введите время и дату в формате(Можно нажать и скопируется):\n<code>${exampleDate}</code>\n`,
+      `⏰ Введите время и дату в формате:\n<code>${exampleDate}</code>\n`,
       { parse_mode: 'HTML' },
     );
   }

@@ -1,4 +1,4 @@
-import * as Joi from 'joi';
+import Joi from 'joi';
 import { registerAs } from '@nestjs/config';
 
 export default registerAs('app', () => ({
